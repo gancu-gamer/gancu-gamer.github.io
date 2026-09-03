@@ -1,1 +1,0 @@
-# gancu-gamer.github.io
