@@ -260,7 +260,37 @@ transform:scale(1.015)}
   .footer-bottom{flex-direction:column;gap:5px}
 }
 
+
+/* RedLine V4 — formularze wysyłane przez Cloudflare Worker */
+.hp-field{
+  position:absolute!important;
+  left:-9999px!important;
+  width:1px!important;
+  height:1px!important;
+  overflow:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+.turnstile-wrap{
+  display:flex;
+  justify-content:flex-start;
+  margin:8px 0 18px;
+  min-height:65px;
+}
+.form-status{
+  min-height:22px;
+  margin:13px 0 0;
+  text-align:center;
+  font-size:12px;
+  font-weight:700;
+}
+.form-status.success{color:#58d68d}
+.form-status.error{color:#ff5a67}
+.form-status.sending{color:#aab3be}
+.btn[disabled]{opacity:.55;cursor:not-allowed;transform:skewX(-7deg)!important}
+
 </style>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -316,24 +346,19 @@ transform:scale(1.015)}
         <label><span>Temat</span><input name="subject" required placeholder="Krótko opisz, czego dotyczy sprawa"></label>
         <label><span>Treść zgłoszenia</span><textarea name="message" rows="8" required placeholder="Opisz sytuację możliwie dokładnie..."></textarea></label>
         <label><span>Pracownik, którego dotyczy zgłoszenie</span><input name="employee" placeholder="Jeśli dotyczy konkretnej osoby"></label>
-        <button class="btn btn-primary full" type="submit">Przygotuj zgłoszenie</button>
-        <p class="form-hint">Po przygotowaniu zgłoszenia skopiujesz jego treść jednym kliknięciem.</p>
+        <label class="hp-field" aria-hidden="true">Strona internetowa
+          <input name="website" type="text" tabindex="-1" autocomplete="off">
+        </label>
+        <div class="turnstile-wrap">
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAEmNXvf7iApaY2Q2" data-theme="dark" data-action="help_center"></div>
+        </div>
+        <button class="btn btn-primary full" id="helpSubmit" type="submit">Wyślij zgłoszenie</button>
+        <p class="form-hint">Po wysłaniu zgłoszenie trafi bezpośrednio do Help Center RedLine Performance.</p>
+        <p class="form-status" id="helpStatus" aria-live="polite"></p>
       </form>
     </div>
   </section>
 </main>
-
-<div class="modal" id="submissionModal" aria-hidden="true">
-  <div class="modal-backdrop" data-close-modal></div>
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <button class="modal-close" type="button" data-close-modal aria-label="Zamknij">×</button>
-    <span class="kicker">ZGŁOSZENIE GOTOWE</span>
-    <h2 id="modalTitle">Treść została przygotowana.</h2>
-    <p>Skopiuj ją jednym kliknięciem. W kolejnym etapie podłączymy automatyczną wysyłkę do Discorda.</p>
-    <textarea id="submissionText" rows="12" readonly></textarea>
-    <button class="btn btn-primary full" type="button" id="copySubmission">Skopiuj zgłoszenie</button>
-  </div>
-</div>
 
 <footer class="site-footer">
   <div class="container footer-main">
@@ -465,26 +490,70 @@ if (recruitmentForm) {
   });
 }
 
+
 const helpForm = byId("helpForm");
 if (helpForm) {
-  helpForm.addEventListener("submit", e => {
+  const submitBtn = byId("helpSubmit");
+  const status = byId("helpStatus");
+
+  helpForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+
     const f = new FormData(helpForm);
-    const text = [
-      "═══ REDLINE PERFORMANCE · HELP CENTER ═══",
-      "",
-      `Kategoria: ${f.get("category")}`,
-      `Zgłaszający: ${f.get("name")}`,
-      `Kontakt: ${f.get("contact") || "Nie podano"}`,
-      `Temat: ${f.get("subject")}`,
-      `Dotyczy pracownika: ${f.get("employee") || "Nie dotyczy / nie podano"}`,
-      "",
-      "Treść zgłoszenia:",
-      f.get("message"),
-      "",
-      "════════════════════════════════════════"
-    ].join("\n");
-    openSubmission(text);
+    const turnstileToken = f.get("cf-turnstile-response");
+
+    status.className = "form-status";
+
+    if (!turnstileToken) {
+      status.textContent = "Potwierdź weryfikację antyspamową.";
+      status.classList.add("error");
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Wysyłanie...";
+    status.textContent = "Przekazujemy zgłoszenie do Help Center...";
+    status.classList.add("sending");
+
+    const payload = {
+      type: "help",
+      turnstileToken,
+      website: f.get("website") || "",
+      name: f.get("name"),
+      contact: f.get("contact") || "",
+      category: f.get("category"),
+      subject: f.get("subject"),
+      employee: f.get("employee") || "",
+      message: f.get("message")
+    };
+
+    try {
+      const response = await fetch("https://redline-api.gancmaciej.workers.dev", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Nie udało się wysłać zgłoszenia.");
+      }
+
+      helpForm.reset();
+      if (window.turnstile) window.turnstile.reset();
+
+      status.textContent = "Zgłoszenie zostało wysłane pomyślnie. Dziękujemy!";
+      status.className = "form-status success";
+      showToast("Zgłoszenie trafiło do Help Center.");
+    } catch (error) {
+      if (window.turnstile) window.turnstile.reset();
+      status.textContent = error.message || "Wystąpił błąd podczas wysyłania.";
+      status.className = "form-status error";
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Wyślij zgłoszenie";
+    }
   });
 }
 

@@ -260,7 +260,37 @@ transform:scale(1.015)}
   .footer-bottom{flex-direction:column;gap:5px}
 }
 
+
+/* RedLine V4 — formularze wysyłane przez Cloudflare Worker */
+.hp-field{
+  position:absolute!important;
+  left:-9999px!important;
+  width:1px!important;
+  height:1px!important;
+  overflow:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+.turnstile-wrap{
+  display:flex;
+  justify-content:flex-start;
+  margin:8px 0 18px;
+  min-height:65px;
+}
+.form-status{
+  min-height:22px;
+  margin:13px 0 0;
+  text-align:center;
+  font-size:12px;
+  font-weight:700;
+}
+.form-status.success{color:#58d68d}
+.form-status.error{color:#ff5a67}
+.form-status.sending{color:#aab3be}
+.btn[disabled]{opacity:.55;cursor:not-allowed;transform:skewX(-7deg)!important}
+
 </style>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -318,24 +348,19 @@ transform:scale(1.015)}
         <label><span>Ile czasu możesz poświęcić na pracę?</span><input name="availability" required placeholder="Np. 3–4 godziny dziennie, głównie wieczorami"></label>
         <label><span>Co wyróżnia Cię na tle innych kandydatów?</span><textarea name="strengths" rows="4" required placeholder="Napisz, dlaczego warto wybrać właśnie Ciebie."></textarea></label>
         <label class="checkbox-row"><input type="checkbox" required><span>Potwierdzam prawdziwość podanych informacji.</span></label>
-        <button class="btn btn-primary full" type="submit">Przygotuj aplikację</button>
-        <p class="form-hint">Po przygotowaniu zgłoszenia skopiujesz jego treść jednym kliknięciem.</p>
+        <label class="hp-field" aria-hidden="true">Strona internetowa
+          <input name="website" type="text" tabindex="-1" autocomplete="off">
+        </label>
+        <div class="turnstile-wrap">
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAEmNXvf7iApaY2Q2" data-theme="dark" data-action="recruitment"></div>
+        </div>
+        <button class="btn btn-primary full" id="recruitSubmit" type="submit">Wyślij aplikację</button>
+        <p class="form-hint">Po wysłaniu aplikacja trafi bezpośrednio do zespołu RedLine Performance.</p>
+        <p class="form-status" id="recruitStatus" aria-live="polite"></p>
       </form>
     </div>
   </section>
 </main>
-
-<div class="modal" id="submissionModal" aria-hidden="true">
-  <div class="modal-backdrop" data-close-modal></div>
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <button class="modal-close" type="button" data-close-modal aria-label="Zamknij">×</button>
-    <span class="kicker">GOTOWE</span>
-    <h2 id="modalTitle">Twoja aplikacja została przygotowana.</h2>
-    <p>Skopiuj treść. W kolejnym etapie system zostanie podłączony bezpośrednio do Discorda.</p>
-    <textarea id="submissionText" rows="12" readonly></textarea>
-    <button class="btn btn-primary full" type="button" id="copySubmission">Skopiuj aplikację</button>
-  </div>
-</div>
 
 <footer class="site-footer">
   <div class="container footer-main">
@@ -437,33 +462,72 @@ if (copySubmission && submissionText) {
   });
 }
 
+
 const recruitmentForm = byId("recruitmentForm");
 if (recruitmentForm) {
-  recruitmentForm.addEventListener("submit", e => {
+  const submitBtn = byId("recruitSubmit");
+  const status = byId("recruitStatus");
+
+  recruitmentForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+
     const f = new FormData(recruitmentForm);
-    const text = [
-      "═══ REDLINE PERFORMANCE · APLIKACJA ═══",
-      "",
-      `Imię i nazwisko: ${f.get("name")}`,
-      `Wiek: ${f.get("age")}`,
-      `Discord: ${f.get("discord")}`,
-      `Telefon: ${f.get("phone") || "Nie podano"}`,
-      "",
-      "Dlaczego RedLine Performance?",
-      f.get("why"),
-      "",
-      "Doświadczenie:",
-      f.get("experience"),
-      "",
-      `Dostępność: ${f.get("availability")}`,
-      "",
-      "Co wyróżnia kandydata?",
-      f.get("strengths"),
-      "",
-      "══════════════════════════════════════"
-    ].join("\n");
-    openSubmission(text);
+    const turnstileToken = f.get("cf-turnstile-response");
+
+    status.className = "form-status";
+
+    if (!turnstileToken) {
+      status.textContent = "Potwierdź weryfikację antyspamową.";
+      status.classList.add("error");
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Wysyłanie...";
+    status.textContent = "Wysyłamy aplikację do RedLine Performance...";
+    status.classList.add("sending");
+
+    const payload = {
+      type: "recruitment",
+      turnstileToken,
+      website: f.get("website") || "",
+      name: f.get("name"),
+      age: Number(f.get("age")),
+      discord: f.get("discord"),
+      phone: f.get("phone") || "",
+      why: f.get("why"),
+      experience: f.get("experience"),
+      availability: f.get("availability"),
+      strengths: f.get("strengths")
+    };
+
+    try {
+      const response = await fetch("https://redline-api.gancmaciej.workers.dev", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Nie udało się wysłać aplikacji.");
+      }
+
+      recruitmentForm.reset();
+      if (window.turnstile) window.turnstile.reset();
+
+      status.textContent = "Aplikacja została wysłana pomyślnie. Dziękujemy!";
+      status.className = "form-status success";
+      showToast("Aplikacja trafiła do RedLine Performance.");
+    } catch (error) {
+      if (window.turnstile) window.turnstile.reset();
+      status.textContent = error.message || "Wystąpił błąd podczas wysyłania.";
+      status.className = "form-status error";
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Wyślij aplikację";
+    }
   });
 }
 
