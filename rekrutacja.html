@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rekrutacja — RedLine Performance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="index.html"><span class="brand-mark">R</span><span class="brand-copy"><strong>REDLINE</strong><small>PERFORMANCE</small></span></a>
+      <button class="menu-btn" aria-label="Otwórz menu" aria-expanded="false">☰</button>
+      <nav class="main-nav">
+        <a href="index.html">Start</a>
+        <a href="o-firmie.html">O firmie</a>
+        <a href="cennik.html">Cennik</a>
+        <a href="eventy.html">Eventy</a>
+        <a class="nav-cta active" href="rekrutacja.html">Rekrutacja</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="eyebrow">DOŁĄCZ DO NAS</span>
+        <h1>Rekrutacja</h1>
+        <p>Wypełnij formularz. Dobra aplikacja powinna pokazać nam, kim jesteś i dlaczego chcesz pracować właśnie w RedLine.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container recruitment-grid">
+        <aside class="recruit-info">
+          <span class="eyebrow">ZANIM WYŚLESZ</span>
+          <h2>Czego oczekujemy?</h2>
+          <div class="check-list">
+            <div>✓ Aktywności i zaangażowania</div>
+            <div>✓ Kultury i komunikatywności</div>
+            <div>✓ Chęci pracy zespołowej</div>
+            <div>✓ Podstawowej wiedzy motoryzacyjnej</div>
+            <div>✓ Odpowiedzialnego podejścia do klientów</div>
+          </div>
+          <div class="notice">
+            Formularz jest gotowy wizualnie. Aby aplikacje faktycznie trafiały do Ciebie,
+            trzeba podłączyć usługę formularzy (np. Formspree) albo inny backend.
+          </div>
+        </aside>
+
+        <form class="application-form" id="applicationForm">
+          <div class="form-head">
+            <span class="tag">APLIKACJA</span>
+            <h2>Formularz kandydata</h2>
+          </div>
+
+          <div class="form-grid two">
+            <label>Imię i nazwisko
+              <input type="text" name="name" placeholder="np. Michael Garcia" required>
+            </label>
+            <label>Wiek
+              <input type="number" name="age" min="16" max="99" placeholder="np. 24" required>
+            </label>
+          </div>
+
+          <div class="form-grid two">
+            <label>Discord
+              <input type="text" name="discord" placeholder="np. nick" required>
+            </label>
+            <label>Numer telefonu / kontakt
+              <input type="text" name="phone" placeholder="opcjonalnie">
+            </label>
+          </div>
+
+          <label>Dlaczego chcesz dołączyć do RedLine Performance?
+            <textarea name="why" rows="5" placeholder="Napisz kilka zdań..." required></textarea>
+          </label>
+
+          <label>Jakie masz doświadczenie?
+            <textarea name="experience" rows="5" placeholder="Warsztat, motoryzacja, obsługa klienta, inne doświadczenia..." required></textarea>
+          </label>
+
+          <label>Ile czasu możesz poświęcić na pracę?
+            <input type="text" name="availability" placeholder="np. 3–4 godziny dziennie, głównie wieczorami" required>
+          </label>
+
+          <label>Co wyróżnia Cię na tle innych kandydatów?
+            <textarea name="strengths" rows="4" placeholder="Pokaż nam, dlaczego warto wybrać właśnie Ciebie." required></textarea>
+          </label>
+
+          <label class="consent">
+            <input type="checkbox" required>
+            <span>Potwierdzam, że podane informacje są prawdziwe i zgadzam się na kontakt w sprawie rekrutacji.</span>
+          </label>
+
+          <button class="btn btn-primary full" type="submit">Wyślij aplikację</button>
+          <p class="form-status" id="formStatus"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-bottom">© <span id="year"></span> RedLine Performance</div>
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>
