@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,700;1,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<title>Eventy — RedLine Performance</title>
-<meta name="description" content="Nadchodzące wydarzenia organizowane przez RedLine Performance.">
+<title>Galeria — RedLine Performance</title>
+<meta name="description" content="Galeria RedLine Performance — warsztat, motoryzacja, eventy i życie naszej społeczności.">
 <style>
 
 :root{
@@ -260,53 +260,288 @@ transform:scale(1.015)}
   .footer-bottom{flex-direction:column;gap:5px}
 }
 
+
+/* === REDLINE GALLERY === */
+.gallery-hero{
+  background:
+    linear-gradient(105deg,rgba(8,10,13,.96),rgba(8,10,13,.65)),
+    url("/redline-performance/gallery/hala-redline.webp") center 48%/cover no-repeat;
+}
+.gallery-section{background:#080a0d}
+.gallery-toolbar{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:36px;
+  margin-bottom:34px;
+}
+.gallery-toolbar h2{
+  font-size:clamp(34px,4vw,54px);
+  line-height:.95;
+  margin:10px 0 0;
+  text-transform:uppercase;
+}
+.gallery-filters{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.gallery-filter{
+  border:1px solid #2b323c;
+  background:#0d1116;
+  color:#8e98a4;
+  padding:10px 14px;
+  cursor:pointer;
+  font:800 13px "Barlow Condensed",sans-serif;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  transition:.2s;
+}
+.gallery-filter:hover{color:#fff;border-color:#515a66}
+.gallery-filter.active{color:#fff;border-color:var(--red);background:rgba(226,11,24,.13)}
+.gallery-grid{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  grid-auto-rows:135px;
+  gap:12px;
+}
+.gallery-item{
+  grid-column:span 4;
+  grid-row:span 3;
+  position:relative;
+  border:0;
+  padding:0;
+  overflow:hidden;
+  background:#0f1318;
+  cursor:pointer;
+  text-align:left;
+  color:#fff;
+  isolation:isolate;
+}
+.gallery-item-wide{grid-column:span 8}
+.gallery-item-tall{grid-row:span 4}
+.gallery-item:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.82));
+  opacity:.8;
+  transition:.3s;
+}
+.gallery-item:after{
+  content:"";
+  position:absolute;
+  z-index:2;
+  left:0;
+  right:100%;
+  bottom:0;
+  height:4px;
+  background:var(--red);
+  transition:.35s ease;
+}
+.gallery-item:hover:after{right:0}
+.gallery-item:hover:before{opacity:1}
+.gallery-item img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform:scale(1.001);
+  transition:transform .55s cubic-bezier(.2,.7,.2,1),filter .35s;
+}
+.gallery-item:hover img{transform:scale(1.045);filter:brightness(.88)}
+.gallery-overlay{
+  position:absolute;
+  z-index:3;
+  left:22px;
+  right:22px;
+  bottom:19px;
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:end;
+  gap:2px 18px;
+}
+.gallery-overlay small{
+  grid-column:1/2;
+  color:#ff3440;
+  font:800 11px Inter,sans-serif;
+  letter-spacing:.13em;
+}
+.gallery-overlay strong{
+  grid-column:1/2;
+  font:800 25px/1 "Barlow Condensed",sans-serif;
+  text-transform:uppercase;
+}
+.gallery-overlay b{
+  grid-column:2/3;
+  grid-row:1/3;
+  align-self:center;
+  width:40px;height:40px;
+  display:grid;place-items:center;
+  border:1px solid rgba(255,255,255,.3);
+  font-size:18px;
+  transition:.25s;
+}
+.gallery-item:hover .gallery-overlay b{background:var(--red);border-color:var(--red)}
+.gallery-item.gallery-hidden{display:none}
+.gallery-end{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px;margin-top:42px}
+.gallery-end span{height:1px;background:#20262e}
+.gallery-end p{margin:0;color:#59636e;font-size:10px;letter-spacing:.16em}
+
+/* Lightbox */
+.gallery-lightbox{
+  position:fixed;
+  inset:0;
+  z-index:999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:35px 80px;
+}
+.gallery-lightbox.open{display:flex}
+.gallery-lightbox-backdrop{position:absolute;inset:0;background:rgba(2,3,5,.94);backdrop-filter:blur(8px)}
+.gallery-lightbox-content{
+  position:relative;
+  z-index:2;
+  max-width:min(1500px,94vw);
+  max-height:88vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.gallery-lightbox-content img{
+  max-width:100%;
+  max-height:80vh;
+  object-fit:contain;
+  box-shadow:0 35px 100px rgba(0,0,0,.6);
+}
+.gallery-lightbox-caption{
+  margin-top:14px;
+  color:#c2c8d0;
+  font:700 15px "Barlow Condensed",sans-serif;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+.gallery-lightbox-close,.gallery-lightbox-nav{
+  position:absolute;z-index:3;
+  border:1px solid #373f49;background:rgba(12,15,20,.75);
+  color:#fff;cursor:pointer;transition:.2s;
+}
+.gallery-lightbox-close{right:24px;top:24px;width:46px;height:46px;font-size:26px}
+.gallery-lightbox-nav{top:50%;width:48px;height:62px;font-size:25px;transform:translateY(-50%)}
+.gallery-lightbox-prev{left:20px}.gallery-lightbox-next{right:20px}
+.gallery-lightbox-close:hover,.gallery-lightbox-nav:hover{background:var(--red);border-color:var(--red)}
+body.gallery-no-scroll{overflow:hidden}
+
+@media(max-width:980px){
+  .gallery-toolbar{align-items:flex-start;flex-direction:column}
+  .gallery-filters{justify-content:flex-start}
+  .gallery-grid{grid-auto-rows:120px}
+  .gallery-item,.gallery-item-tall{grid-column:span 6;grid-row:span 3}
+  .gallery-item-wide{grid-column:span 12}
+}
+@media(max-width:650px){
+  .gallery-grid{display:flex;flex-direction:column}
+  .gallery-item,.gallery-item-wide,.gallery-item-tall{height:260px;width:100%}
+  .gallery-overlay strong{font-size:22px}
+  .gallery-lightbox{padding:70px 12px 85px}
+  .gallery-lightbox-nav{top:auto;bottom:18px;transform:none}
+  .gallery-lightbox-prev{left:calc(50% - 58px)}
+  .gallery-lightbox-next{right:calc(50% - 58px)}
+  .gallery-lightbox-close{right:14px;top:14px}
+  .gallery-end p{text-align:center}
+}
+
 </style>
 </head>
 <body>
 <header class="site-header">
   <div class="container nav-wrap">
-    <a class="brand" href="index.html" aria-label="RedLine Performance">
+    <a class="brand" href="/redline-performance/" aria-label="RedLine Performance">
       <img src="data:image/png;base64,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" alt="RedLine Performance">
     </a>
     <button class="menu-btn" type="button" aria-label="Otwórz menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
     <nav class="main-nav" aria-label="Główna nawigacja">
-      <a class="" href="index.html">Start</a><a class="" href="o-firmie.html">O firmie</a><a class="" href="cennik.html">Cennik</a><a class="active" href="eventy.html">Eventy</a><a class="" href="galeria.html">Galeria</a><a class="" href="help-center.html">Help Center</a><a class="nav-cta" href="rekrutacja.html">Rekrutacja</a>
+      <a class="" href="/redline-performance/">Start</a><a class="" href="/redline-performance/o-firmie.html">O firmie</a><a class="" href="/redline-performance/cennik.html">Cennik</a><a class="" href="/redline-performance/eventy.html">Eventy</a><a class="active" href="/redline-performance/galeria.html">Galeria</a><a class="" href="/redline-performance/help-center.html">Help Center</a><a class="nav-cta" href="/redline-performance/rekrutacja.html">Rekrutacja</a>
     </nav>
   </div>
 </header>
 
 <main>
-  <section class="page-hero">
+  <section class="page-hero gallery-hero">
     <div class="container">
-      <span class="kicker">REDLINE EVENTS</span>
-      <h1>Eventy</h1>
-      <p>W tym miejscu publikujemy najważniejsze informacje o wydarzeniach organizowanych przez RedLine Performance.</p>
+      <span class="kicker">REDLINE MOMENTS</span>
+      <h1>Galeria</h1>
+      <p>Warsztat, samochody, eventy i momenty, które tworzą historię RedLine Performance.</p>
     </div>
   </section>
 
-  <section class="section">
+  <section class="section gallery-section">
     <div class="container">
-      <div class="event-empty">
-        <div class="event-empty-mark">R</div>
-        <span class="kicker">KALENDARZ WYDARZEŃ</span>
-        <h2>Aktualnie brak zaplanowanych eventów.</h2>
-        <p>Gdy pojawi się nowe wydarzenie, znajdziesz tutaj jego datę, godzinę, miejsce i wszystkie szczegóły.</p>
+      <div class="gallery-toolbar">
+        <div>
+          <span class="kicker">REDLINE PERFORMANCE</span>
+          <h2>Życie warsztatu w obiektywie.</h2>
+        </div>
+        <div class="gallery-filters" aria-label="Filtry galerii">
+          <button class="gallery-filter active" data-filter="all" type="button">Wszystkie</button>
+          <button class="gallery-filter" data-filter="warsztat" type="button">Warsztat</button>
+          <button class="gallery-filter" data-filter="motorsport" type="button">Motorsport</button>
+          <button class="gallery-filter" data-filter="spolecznosc" type="button">Społeczność</button>
+          <button class="gallery-filter" data-filter="eventy" type="button">Eventy</button>
+        </div>
       </div>
-    </div>
-  </section>
 
-  <section class="photo-band event-band">
-    <div class="container photo-band-inner">
-      <div>
-        <span class="kicker">NIE PRZEGAP</span>
-        <h2>RedLine to nie tylko serwis.</h2>
-        <p>Spotkania motoryzacyjne, konkursy, akcje specjalne i wydarzenia dla społeczności będą publikowane właśnie tutaj.</p>
+      <div class="gallery-grid" id="galleryGrid">
+        <button class="gallery-item gallery-item-wide" type="button" data-category="warsztat" data-full="/redline-performance/gallery/warsztat-na-pelnych-obrotach.webp" data-caption="RedLine — warsztat na pełnych obrotach">
+          <img src="/redline-performance/gallery/warsztat-na-pelnych-obrotach.webp" alt="Samochody podczas pracy w warsztacie RedLine Performance" loading="eager">
+          <span class="gallery-overlay"><small>WARSZTAT</small><strong>Na pełnych obrotach</strong><b>↗</b></span>
+        </button>
+
+        <button class="gallery-item" type="button" data-category="motorsport" data-full="/redline-performance/gallery/motorsport.webp" data-caption="Motorsport — RedLine Performance">
+          <img src="/redline-performance/gallery/motorsport.webp" alt="Samochód wyścigowy nocą" loading="lazy">
+          <span class="gallery-overlay"><small>MOTORSPORT</small><strong>Prędkość po godzinach</strong><b>↗</b></span>
+        </button>
+
+        <button class="gallery-item gallery-item-tall" type="button" data-category="warsztat" data-full="/redline-performance/gallery/hala-redline.webp" data-caption="Hala RedLine Performance">
+          <img src="/redline-performance/gallery/hala-redline.webp" alt="Widok z góry na halę RedLine Performance" loading="lazy">
+          <span class="gallery-overlay"><small>WARSZTAT</small><strong>Serce RedLine</strong><b>↗</b></span>
+        </button>
+
+        <button class="gallery-item" type="button" data-category="spolecznosc" data-full="/redline-performance/gallery/spotkanie-motoryzacyjne.webp" data-caption="Społeczność RedLine Performance">
+          <img src="/redline-performance/gallery/spotkanie-motoryzacyjne.webp" alt="Spotkanie samochodowe społeczności RedLine" loading="lazy">
+          <span class="gallery-overlay"><small>SPOŁECZNOŚĆ</small><strong>Razem wokół motoryzacji</strong><b>↗</b></span>
+        </button>
+
+        <button class="gallery-item" type="button" data-category="warsztat" data-full="/redline-performance/gallery/redline-assistance.webp" data-caption="RedLine Assistance">
+          <img src="/redline-performance/gallery/redline-assistance.webp" alt="Samochód RedLine Assistance podczas transportu pojazdu" loading="lazy">
+          <span class="gallery-overlay"><small>REDLINE ASSISTANCE</small><strong>Pomoc w terenie</strong><b>↗</b></span>
+        </button>
+
+        <button class="gallery-item gallery-item-wide" type="button" data-category="eventy" data-full="/redline-performance/gallery/event-redline.webp" data-caption="Event RedLine Performance">
+          <img src="/redline-performance/gallery/event-redline.webp" alt="Event w warsztacie RedLine Performance" loading="lazy">
+          <span class="gallery-overlay"><small>EVENTY</small><strong>RedLine od innej strony</strong><b>↗</b></span>
+        </button>
+      </div>
+
+      <div class="gallery-end">
+        <span></span>
+        <p>REDLINE PERFORMANCE · BURTON · CARCER WAY 7204</p>
+        <span></span>
       </div>
     </div>
   </section>
 </main>
+
+<div class="gallery-lightbox" id="galleryLightbox" aria-hidden="true">
+  <div class="gallery-lightbox-backdrop" data-gallery-close></div>
+  <button class="gallery-lightbox-close" type="button" aria-label="Zamknij zdjęcie" data-gallery-close>×</button>
+  <button class="gallery-lightbox-nav gallery-lightbox-prev" type="button" aria-label="Poprzednie zdjęcie">‹</button>
+  <div class="gallery-lightbox-content">
+    <img id="galleryLightboxImage" alt="">
+    <div class="gallery-lightbox-caption" id="galleryLightboxCaption"></div>
+  </div>
+  <button class="gallery-lightbox-nav gallery-lightbox-next" type="button" aria-label="Następne zdjęcie">›</button>
+</div>
+
 <footer class="site-footer">
   <div class="container footer-main">
     <div class="footer-brand">
@@ -315,15 +550,15 @@ transform:scale(1.015)}
     </div>
     <div class="footer-col">
       <strong>RedLine Performance</strong>
-      <a href="o-firmie.html">O firmie</a>
-      <a href="cennik.html">Cennik</a>
-      <a href="eventy.html">Eventy</a>
-      <a href="galeria.html">Galeria</a>
+      <a href="/redline-performance/o-firmie.html">O firmie</a>
+      <a href="/redline-performance/cennik.html">Cennik</a>
+      <a href="/redline-performance/eventy.html">Eventy</a>
+      <a href="/redline-performance/galeria.html">Galeria</a>
     </div>
     <div class="footer-col">
       <strong>Kontakt i wsparcie</strong>
-      <a href="help-center.html">Help Center</a>
-      <a href="rekrutacja.html">Rekrutacja</a>
+      <a href="/redline-performance/help-center.html">Help Center</a>
+      <a href="/redline-performance/rekrutacja.html">Rekrutacja</a>
       <span>BURTON · Carcer Way 7204</span>
     </div>
   </div>
@@ -461,6 +696,69 @@ if (helpForm) {
   });
 }
 
+</script>
+
+
+<script>
+(() => {
+  const filters = [...document.querySelectorAll(".gallery-filter")];
+  const items = [...document.querySelectorAll(".gallery-item")];
+  const lightbox = document.getElementById("galleryLightbox");
+  const lightboxImage = document.getElementById("galleryLightboxImage");
+  const lightboxCaption = document.getElementById("galleryLightboxCaption");
+  const prev = document.querySelector(".gallery-lightbox-prev");
+  const next = document.querySelector(".gallery-lightbox-next");
+  let visibleItems = items;
+  let currentIndex = 0;
+
+  function applyFilter(filter) {
+    filters.forEach(btn => btn.classList.toggle("active", btn.dataset.filter === filter));
+    items.forEach(item => {
+      const show = filter === "all" || item.dataset.category === filter;
+      item.classList.toggle("gallery-hidden", !show);
+    });
+    visibleItems = items.filter(item => !item.classList.contains("gallery-hidden"));
+  }
+
+  filters.forEach(btn => btn.addEventListener("click", () => applyFilter(btn.dataset.filter)));
+
+  function show(index) {
+    if (!visibleItems.length) return;
+    currentIndex = (index + visibleItems.length) % visibleItems.length;
+    const item = visibleItems[currentIndex];
+    lightboxImage.src = item.dataset.full;
+    lightboxImage.alt = item.querySelector("img")?.alt || "";
+    lightboxCaption.textContent = item.dataset.caption || "";
+  }
+
+  function open(item) {
+    visibleItems = items.filter(el => !el.classList.contains("gallery-hidden"));
+    currentIndex = visibleItems.indexOf(item);
+    show(currentIndex);
+    lightbox.classList.add("open");
+    lightbox.setAttribute("aria-hidden", "false");
+    document.body.classList.add("gallery-no-scroll");
+  }
+
+  function close() {
+    lightbox.classList.remove("open");
+    lightbox.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("gallery-no-scroll");
+    setTimeout(() => { lightboxImage.src = ""; }, 150);
+  }
+
+  items.forEach(item => item.addEventListener("click", () => open(item)));
+  document.querySelectorAll("[data-gallery-close]").forEach(el => el.addEventListener("click", close));
+  prev.addEventListener("click", () => show(currentIndex - 1));
+  next.addEventListener("click", () => show(currentIndex + 1));
+
+  document.addEventListener("keydown", (e) => {
+    if (!lightbox.classList.contains("open")) return;
+    if (e.key === "Escape") close();
+    if (e.key === "ArrowLeft") show(currentIndex - 1);
+    if (e.key === "ArrowRight") show(currentIndex + 1);
+  });
+})();
 </script>
 
 </body>
