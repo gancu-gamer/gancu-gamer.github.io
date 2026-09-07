@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#111318" />
+  <title>Czas pracy</title>
+  <style>
+    :root{
+      --bg:#0f1115;
+      --panel:#171a21;
+      --panel2:#1d212a;
+      --text:#f4f6fb;
+      --muted:#9aa3b2;
+      --border:#2a303b;
+      --green:#39d98a;
+      --green2:#22b873;
+      --red:#ff5d68;
+      --blue:#6da8ff;
+      --shadow:0 20px 50px rgba(0,0,0,.28);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(109,168,255,.08), transparent 30%),
+        radial-gradient(circle at top right, rgba(57,217,138,.08), transparent 30%),
+        var(--bg);
+      color:var(--text);
+    }
+
+    .wrap{
+      width:min(1100px, calc(100% - 32px));
+      margin:0 auto;
+      padding:42px 0 64px;
+    }
+
+    header{
+      display:flex;
+      justify-content:space-between;
+      gap:20px;
+      align-items:end;
+      margin-bottom:24px;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(30px,5vw,46px);
+      letter-spacing:-1.5px;
+    }
+
+    .subtitle{
+      color:var(--muted);
+      margin-top:8px;
+      font-size:15px;
+    }
+
+    .rate{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px 16px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .rate strong{color:var(--text)}
+
+    .grid{
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:20px;
+    }
+
+    .card{
+      background:rgba(23,26,33,.94);
+      border:1px solid var(--border);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+    }
+
+    .timer-card{
+      padding:34px;
+      display:flex;
+      min-height:330px;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+    }
+
+    .status{
+      color:var(--muted);
+      font-size:14px;
+      margin-bottom:18px;
+    }
+
+    .status.running{
+      color:var(--green);
+    }
+
+    .timer{
+      font-variant-numeric:tabular-nums;
+      font-weight:800;
+      font-size:clamp(48px,8vw,82px);
+      line-height:1;
+      letter-spacing:-3px;
+      margin-bottom:14px;
+    }
+
+    .live-money{
+      color:var(--muted);
+      font-size:18px;
+      margin-bottom:28px;
+    }
+
+    .live-money strong{
+      color:var(--green);
+      font-size:22px;
+    }
+
+    .controls{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+
+    button{
+      border:0;
+      cursor:pointer;
+      font:inherit;
+      font-weight:800;
+      border-radius:14px;
+      transition:.18s ease;
+    }
+
+    button:hover{transform:translateY(-1px)}
+    button:active{transform:translateY(0)}
+
+    .primary{
+      min-width:150px;
+      padding:15px 26px;
+      background:var(--green);
+      color:#07130d;
+    }
+
+    .primary:hover{background:var(--green2)}
+
+    .stop{
+      min-width:150px;
+      padding:15px 26px;
+      background:var(--red);
+      color:white;
+    }
+
+    .stop:disabled,
+    .primary:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .summary{
+      padding:24px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+
+    .summary h2{
+      font-size:19px;
+      margin:0 0 2px;
+    }
+
+    .month-picker{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    input[type="month"]{
+      width:100%;
+      background:var(--panel2);
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px 13px;
+      font:inherit;
+      color-scheme:dark;
+    }
+
+    .stat{
+      background:var(--panel2);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:18px;
+    }
+
+    .stat-label{
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:7px;
+    }
+
+    .stat-value{
+      font-size:29px;
+      font-weight:850;
+      letter-spacing:-.7px;
+    }
+
+    .stat-value.money{color:var(--green)}
+
+    .table-card{
+      margin-top:20px;
+      overflow:hidden;
+    }
+
+    .table-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:15px;
+      padding:20px 22px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .table-head h2{
+      margin:0;
+      font-size:19px;
+    }
+
+    .clear-btn{
+      background:transparent;
+      color:var(--muted);
+      border:1px solid var(--border);
+      padding:9px 12px;
+      font-size:13px;
+    }
+
+    .clear-btn:hover{
+      color:white;
+      border-color:#455064;
+    }
+
+    .table-wrap{overflow:auto}
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:760px;
+    }
+
+    th,td{
+      padding:15px 18px;
+      text-align:left;
+      border-bottom:1px solid var(--border);
+      font-size:14px;
+    }
+
+    th{
+      color:var(--muted);
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.5px;
+      background:#15181f;
+    }
+
+    tbody tr:hover{background:rgba(255,255,255,.015)}
+
+    .money-cell{
+      color:var(--green);
+      font-weight:750;
+    }
+
+    .delete{
+      background:transparent;
+      color:#ff7c85;
+      padding:7px 10px;
+      border:1px solid rgba(255,93,104,.25);
+      font-size:12px;
+    }
+
+    .empty{
+      padding:32px;
+      color:var(--muted);
+      text-align:center;
+    }
+
+    .note{
+      margin-top:15px;
+      color:#7f8999;
+      font-size:12px;
+      text-align:center;
+    }
+
+    @media (max-width:800px){
+      .grid{grid-template-columns:1fr}
+      header{align-items:flex-start;flex-direction:column}
+      .rate{width:100%}
+      .timer-card{min-height:300px;padding:28px 18px}
+      .wrap{width:min(100% - 20px,1100px);padding-top:24px}
+      .timer{letter-spacing:-2px}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div>
+        <h1>Czas pracy</h1>
+        <div class="subtitle">Prosty licznik godzin i zarobków.</div>
+      </div>
+      <div class="rate">Stawka: <strong>30,00 zł / godz.</strong></div>
+    </header>
+
+    <section class="grid">
+      <div class="card timer-card">
+        <div id="status" class="status">Gotowy do rozpoczęcia pracy</div>
+        <div id="timer" class="timer">00:00:00</div>
+        <div class="live-money">Bieżący zarobek: <strong id="liveMoney">0,00 zł</strong></div>
+        <div class="controls">
+          <button id="startBtn" class="primary">START</button>
+          <button id="stopBtn" class="stop" disabled>STOP I ZAPISZ</button>
+        </div>
+      </div>
+
+      <aside class="card summary">
+        <h2>Podsumowanie miesiąca</h2>
+        <div class="month-picker">
+          <input id="monthPicker" type="month">
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">Łączny czas pracy</div>
+          <div id="monthTime" class="stat-value">0 h 00 min</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">Łączny zarobek</div>
+          <div id="monthMoney" class="stat-value money">0,00 zł</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">Liczba zapisanych zmian</div>
+          <div id="monthSessions" class="stat-value">0</div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="card table-card">
+      <div class="table-head">
+        <h2>Historia pracy</h2>
+        <button id="clearBtn" class="clear-btn">Wyczyść wszystkie wpisy</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Start</th>
+              <th>Stop</th>
+              <th>Czas pracy</th>
+              <th>Zarobek</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+        <div id="emptyState" class="empty">Brak zapisanych zmian.</div>
+      </div>
+    </section>
+
+    <div class="note">Dane są zapisywane lokalnie w tej przeglądarce.</div>
+  </main>
+
+  <script>
+    const HOURLY_RATE = 30;
+    const STORAGE_KEY = 'workTimerSessions_v1';
+    const RUNNING_KEY = 'workTimerRunning_v1';
+
+    const timerEl = document.getElementById('timer');
+    const liveMoneyEl = document.getElementById('liveMoney');
+    const statusEl = document.getElementById('status');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const historyBody = document.getElementById('historyBody');
+    const emptyState = document.getElementById('emptyState');
+    const monthPicker = document.getElementById('monthPicker');
+    const monthTime = document.getElementById('monthTime');
+    const monthMoney = document.getElementById('monthMoney');
+    const monthSessions = document.getElementById('monthSessions');
+    const clearBtn = document.getElementById('clearBtn');
+
+    let timerInterval = null;
+
+    function getSessions() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveSessions(sessions) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+    }
+
+    function getRunningStart() {
+      const value = localStorage.getItem(RUNNING_KEY);
+      return value ? Number(value) : null;
+    }
+
+    function setRunningStart(ts) {
+      localStorage.setItem(RUNNING_KEY, String(ts));
+    }
+
+    function clearRunningStart() {
+      localStorage.removeItem(RUNNING_KEY);
+    }
+
+    function pad(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    function formatDuration(ms) {
+      const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+      const h = Math.floor(totalSeconds / 3600);
+      const m = Math.floor((totalSeconds % 3600) / 60);
+      const s = totalSeconds % 60;
+      return `${pad(h)}:${pad(m)}:${pad(s)}`;
+    }
+
+    function formatMonthDuration(ms) {
+      const totalMinutes = Math.floor(ms / 60000);
+      const h = Math.floor(totalMinutes / 60);
+      const m = totalMinutes % 60;
+      return `${h} h ${pad(m)} min`;
+    }
+
+    function formatMoney(value) {
+      return value.toLocaleString('pl-PL', {
+        style: 'currency',
+        currency: 'PLN'
+      });
+    }
+
+    function earnedFromMs(ms) {
+      return (ms / 3600000) * HOURLY_RATE;
+    }
+
+    function formatDate(ts) {
+      return new Date(ts).toLocaleDateString('pl-PL');
+    }
+
+    function formatTime(ts) {
+      return new Date(ts).toLocaleTimeString('pl-PL', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+
+    function currentMonthValue() {
+      const d = new Date();
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+    }
+
+    function sessionMonth(session) {
+      const d = new Date(session.start);
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+    }
+
+    function updateTimer() {
+      const start = getRunningStart();
+      if (!start) {
+        timerEl.textContent = '00:00:00';
+        liveMoneyEl.textContent = formatMoney(0);
+        return;
+      }
+
+      const elapsed = Date.now() - start;
+      timerEl.textContent = formatDuration(elapsed);
+      liveMoneyEl.textContent = formatMoney(earnedFromMs(elapsed));
+    }
+
+    function setRunningUI(running) {
+      startBtn.disabled = running;
+      stopBtn.disabled = !running;
+      statusEl.textContent = running ? 'Praca trwa…' : 'Gotowy do rozpoczęcia pracy';
+      statusEl.classList.toggle('running', running);
+    }
+
+    function startWork() {
+      if (getRunningStart()) return;
+      setRunningStart(Date.now());
+      setRunningUI(true);
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function stopWork() {
+      const start = getRunningStart();
+      if (!start) return;
+
+      const end = Date.now();
+      const duration = Math.max(0, end - start);
+
+      const sessions = getSessions();
+      sessions.push({
+        id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()),
+        start,
+        end,
+        duration,
+        earned: earnedFromMs(duration)
+      });
+
+      saveSessions(sessions);
+      clearRunningStart();
+
+      clearInterval(timerInterval);
+      timerInterval = null;
+
+      setRunningUI(false);
+      updateTimer();
+      renderAll();
+    }
+
+    function deleteSession(id) {
+      const sessions = getSessions().filter(s => s.id !== id);
+      saveSessions(sessions);
+      renderAll();
+    }
+
+    function clearAll() {
+      const sessions = getSessions();
+      if (!sessions.length) return;
+
+      const ok = confirm('Na pewno usunąć wszystkie zapisane wpisy?');
+      if (!ok) return;
+
+      localStorage.removeItem(STORAGE_KEY);
+      renderAll();
+    }
+
+    function renderHistory() {
+      const sessions = getSessions().sort((a,b) => b.start - a.start);
+      historyBody.innerHTML = '';
+
+      emptyState.style.display = sessions.length ? 'none' : 'block';
+
+      for (const session of sessions) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${formatDate(session.start)}</td>
+          <td>${formatTime(session.start)}</td>
+          <td>${formatTime(session.end)}</td>
+          <td>${formatDuration(session.duration)}</td>
+          <td class="money-cell">${formatMoney(session.earned)}</td>
+          <td><button class="delete" data-id="${session.id}">Usuń</button></td>
+        `;
+        historyBody.appendChild(tr);
+      }
+
+      historyBody.querySelectorAll('.delete').forEach(btn => {
+        btn.addEventListener('click', () => deleteSession(btn.dataset.id));
+      });
+    }
+
+    function renderSummary() {
+      const selectedMonth = monthPicker.value || currentMonthValue();
+      const sessions = getSessions().filter(s => sessionMonth(s) === selectedMonth);
+
+      const totalMs = sessions.reduce((sum, s) => sum + Number(s.duration || 0), 0);
+      const totalMoney = sessions.reduce((sum, s) => sum + Number(s.earned || 0), 0);
+
+      monthTime.textContent = formatMonthDuration(totalMs);
+      monthMoney.textContent = formatMoney(totalMoney);
+      monthSessions.textContent = sessions.length;
+    }
+
+    function renderAll() {
+      renderHistory();
+      renderSummary();
+    }
+
+    startBtn.addEventListener('click', startWork);
+    stopBtn.addEventListener('click', stopWork);
+    clearBtn.addEventListener('click', clearAll);
+    monthPicker.addEventListener('change', renderSummary);
+
+    monthPicker.value = currentMonthValue();
+
+    const running = !!getRunningStart();
+    setRunningUI(running);
+    updateTimer();
+
+    if (running) {
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
